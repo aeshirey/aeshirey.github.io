@@ -14,7 +14,7 @@ A trivial example of the Rust code one might implement:
 
 ```rust
 #[pyfunction]
-fn do_something_in_rust(py: Python, obj: &PyAny) -> PyResult<()> {
+fn do_something_in_rust(py: Python, value: &PyAny) -> PyResult<()> {
     let strval: Result<&str, PyErr> = value.extract();
     if let Ok(strval) = strval {
         println!("Received string value of \"{}\"", strval);
