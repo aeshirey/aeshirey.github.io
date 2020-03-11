@@ -2,7 +2,8 @@
 layout: post
 title:  "fsspec with adl"
 date:   2020-03-10 19:27:07 -0700
-categories: python
+category: code
+tags: [python]
 ---
 
 
