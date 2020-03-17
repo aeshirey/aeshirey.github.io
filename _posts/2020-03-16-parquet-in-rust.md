@@ -54,7 +54,6 @@ use parquet::record::{ListAccessor, RowAccessor};
 
 fn main() {
     let filename = "my_dataset.parquet";
-
     let fh = File::open(filename).unwrap();
     let reader: SerializedFileReader<File> = SerializedFileReader::new(fh).unwrap();
 
@@ -67,10 +66,12 @@ fn main() {
         let name = row.get_string(0).unwrap();
         let age = row.get_long(1).unwrap();
 
-        // NB: Trying to read in the column with get_long or get_float will fail; it must be get_double
-        let height = row.get_double(2).unwrap();
-
-        let languages: &parquet::record::List = row.get_list(3).unwrap();
+        // Appropriate handling of null input values:
+        let height = if let Ok(height_val) = row.get_double(2) {
+            height_val
+        } else {
+            -9999.
+        };
 
         let is_employed = row.get_bool(4).unwrap();
 
@@ -78,16 +79,21 @@ fn main() {
             "    Name={}, age={}, height={}, is_employed={}",
             name, age, height, is_employed
         );
-        print!("    Languages: ");
+
+        let languages: &parquet::record::List = row.get_list(3).unwrap();
+
         if languages.len() == 0 {
-            println!("(none)");
+            println!("Languages: (none)");
         } else {
-            for i in 0..languages.len() {
-                let lang = languages.get_string(i).unwrap();
-                print!("{}, ", lang);
-            }
+            let joined_langs = (0..languages.len())
+                .map(|i| languages.get_string(i).unwrap().to_string())
+                .collect::<Vec<_>>()
+                .join(", ");
+            println!("    Languages: {}", joined_langs);
         }
-        println!("\n---");
+        println!("---");
     }
+
+    println!("Read {} records from {}", lines, filename);
 }
 ```
