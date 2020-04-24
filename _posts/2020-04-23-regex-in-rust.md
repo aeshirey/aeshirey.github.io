@@ -22,9 +22,7 @@ use regex::Regex;
 
 fn main() {
     let email = r#""John Smith" <jsmith@example.com>"#;
-
     let name_addr_re = Regex::new(r#""(.?+)" <([^>]+)>"#).unwrap();
-    let addr_re = Regex::new(r#""(.?+)" <([^>]+)>"#).unwrap();
 
     match name_addr_re.captures(email) {
         Some(cap) => {

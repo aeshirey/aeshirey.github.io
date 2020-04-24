@@ -42,7 +42,6 @@ fn display(schema: &Type, depth: usize) {
         }
     }
 }
-
 ```
 
 Running this code generates the following output for the sample dataset:
