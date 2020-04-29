@@ -22,7 +22,7 @@ error: linking with `cc` failed: exit code: 1
 error: aborting due to previous error; 10 warnings emitted
 ```
 
-This is different than [`linker \`cc\` not found`](https://stackoverflow.com/questions/52445961/how-do-i-fix-the-rust-error-linker-cc-not-found-for-debian-on-windows-10). I didn't know that there's actually a [`python3m` executable](https://stackoverflow.com/questions/16675865/difference-between-python3-and-python3m-executables) to which this error message alludes, but it comes with Python. This error is caused by a missing [`libpython3.5-dev` package](https://packages.debian.org/stretch/libpython3.5-dev) (or whatever python version you're using). Install this and it should work:
+This is different than [`linker 'cc' not found`](https://stackoverflow.com/questions/52445961/how-do-i-fix-the-rust-error-linker-cc-not-found-for-debian-on-windows-10). I didn't know that there's actually a [`python3m` executable](https://stackoverflow.com/questions/16675865/difference-between-python3-and-python3m-executables) to which this error message alludes, but it comes with Python. This error is caused by a missing [`libpython3.5-dev` package](https://packages.debian.org/stretch/libpython3.5-dev) (or whatever python version you're using). Install this and it should work:
 
 ```bash
 sudo apt install libpython3.5-dev
