@@ -13,7 +13,7 @@ I recently made [a contribution](https://github.com/nushell/nushell/commit/ad8ab
 
 ### Add [`crates/nu-cli/src/commands/from_eml.rs`](https://github.com/nushell/nushell/commit/ad8ab5b04d2786362044fe4d66227f5ff85206f0#diff-98e7a3b8702cb1f1df8d2a9b62d46847)
 * Create my command, presented as the `FromEML` struct
-* Create ancillary `FromEMLArgs` struct with arguments relevant to my command. In my case, I want to be able to pass in `how many bytes of the email body I want to be able to preview. This corresponds directly to the builder function [`with_body_preview` in my crate](https://github.com/aeshirey/EmlParser/blob/422551d9dcbe103a2cdf0452502a63759a91269b/src/parser.rs#L77).
+* Create ancillary `FromEMLArgs` struct with arguments relevant to my command. In my case, I want to be able to pass in how many bytes of the email body I want to be able to preview. This corresponds directly to the builder function [`with_body_preview` in my crate](https://github.com/aeshirey/EmlParser/blob/422551d9dcbe103a2cdf0452502a63759a91269b/src/parser.rs#L77).
 * Implement `WholeStreamCommand` for my struct, conforming to the contract that hooks my plugin into the Nu ecosystem.
 * The core logic for adding my command went into a [`from_eml` function](https://github.com/nushell/nushell/blob/ad8ab5b04d2786362044fe4d66227f5ff85206f0/crates/nu-cli/src/commands/from_eml.rs#L79) -- the name isn't required to conform to the command, as it [gets called in the `WholeStreamCommand::run` impl](https://github.com/nushell/nushell/blob/ad8ab5b04d2786362044fe4d66227f5ff85206f0/crates/nu-cli/src/commands/from_eml.rs#L42).
 
