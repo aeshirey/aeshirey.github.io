@@ -6,6 +6,7 @@ category: code
 tags: [rust]
 ---
 
+## Statically-linked
 Create a simple C library, `c-code/my-library.c`:
 
 ```c
@@ -43,7 +44,7 @@ This tells Rust that we have a library `mylib` containing a `square` function. I
 ```rust
 fn main() {
     // Recompile if my-library.c is updated
-    println!("cargo:rerun-if-changed=src/my-library.c");
+    println!("cargo:rerun-if-changed=c-code/my-library.c");
 
     // Use the `cc` crate to build a C file and statically link it.
     cc::Build::new()
@@ -65,5 +66,70 @@ $ cargo run
    Compiling simple-ffi v0.1.0 (/mnt/c/Users/adam/c)
     Finished dev [unoptimized + debuginfo] target(s) in 0.80s
      Running `target/debug/c`
+3**2 = 9
+```
+
+# Dynamically-linked
+We can also dynamically link to a shared object (`.so`) file instead. The `Cargo.toml` file no longer needs the `[build-dependencies]` section.
+
+The Rust binary no longer needs to specify that it's linking to a library:
+
+```rust
+//#[link(name="mylib")] <-- this line not needed
+extern "C" {
+    fn square(val: i32) -> i32;
+}
+
+fn main() {
+    let sq = unsafe { square(3) };
+    println!("3**2 = {}", sq);
+}
+```
+
+To build our program, `rustc` will need to know about this library. Therefore, we instruct our `build.rs` script to use [`rustc-link-search`](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search) in order to know where the library is during compilation. The build script also specifies that we want to link to the `my-library` dynamic library.
+
+```rust
+fn main() {
+    println!("cargo:rustc-link-search=native=c-code/"); // +
+    println!("cargo:rustc-link-lib=dylib=my-library");
+}
+```
+**NOTE** that while we're calling the library `my-library`, the linker actulaly looks for a file with a 'lib' prefix: `libmy-library.so`, so we have to compile it accordingly:
+
+```bash
+$ gcc c-code/my-library.c -c -shared -o libmy-library.so
+
+$ ls *.so
+libmy-library.so
+
+$ file libmy-library.so
+libmy-library.so: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
+```
+
+We should be able to build now:
+
+```bash
+$ cargo build
+   Compiling simple-ffi v0.1.0 (/mnt/c/Users/adam/c)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.67s
+
+$ ./target/debug/simple-ffi
+./target/debug/simple-ffi: error while loading shared libraries: libmylib.so: cannot open shared object file: No such file or directory
+
+$ ldd target/debug/simple-ffi
+        linux-vdso.so.1 (0x00007fffe5d32000)
+        libmylib.so => not found
+        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f7c61a70000)
+        librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f7c61860000)
+        libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f7c61640000)
+        libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f7c61420000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7c61020000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f7c62000000)
+```
+
+The binary file can't find the library, and running `ldd` shows that it's attempting to dynamically load the shared object file we compiled. Even if that file is in the same directory, it doesn't work because that's not how Linux loads its shared objects. You have to either copy the .so file into or update your `LD_LIBRARY_PATH`. The quick fix is to do the latter:
+
+```bash
+$ LD_LIBRARY_PATH=. ./target/debug/simple-ffi
 3**2 = 9
 ```
