@@ -10,7 +10,7 @@ Create a simple C library, `c-code/my-library.c`:
 
 ```c
 int square(int num) {
-        return num * num;
+    return num * num;
 }
 ```
 
@@ -19,7 +19,7 @@ This step is _not_ needed for this post, but we could compile this with `cc -c m
 ```bash
 $ cc my-library.c -c
 $ ls
-build.sh  my-library.c  my-library.o
+my-library.c  my-library.o
 $ file my-library.o
 my-library.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
 ```
@@ -64,6 +64,6 @@ With this, we're set:
 $ cargo run
    Compiling simple-ffi v0.1.0 (/mnt/c/Users/adam/c)
     Finished dev [unoptimized + debuginfo] target(s) in 0.80s
-     Running `target/debug/simple-ffi`
+     Running `target/debug/c`
 3**2 = 9
 ```
