@@ -10,13 +10,17 @@ post_name = input("New post name: ").strip()
 filename = ymd + '-' + re.sub('[^a-z0-9]+', '-', post_name.lower()).strip('-')
 filename = "_posts/%s.md" % filename
 
+tags = []
+if 'python' in post_name.lower(): tags.append('python')
+if 'rust' in post_name.lower(): tags.append('rust')
+
+if len(tags) == 0:
+    tags = [tag.strip() for tag in input('No tags found. Enter tags separated by a comma: ').strip().lower().split(',')]
+
 if 'y' != input('Create post "%s"? [y/N] ' % filename).strip().lower():
     print("Cancelling")
     exit(-1)
 
-tags = []
-if 'python' in post_name.lower(): tags.append('python')
-if 'rust' in post_name.lower(): tags.append('rust')
 
 with open(filename, 'w') as fh:
     fh.write("""---
