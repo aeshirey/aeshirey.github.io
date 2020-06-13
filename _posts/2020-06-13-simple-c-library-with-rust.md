@@ -15,7 +15,7 @@ int square(int num) {
 }
 ```
 
-This step is _not_ needed for this post, but we could compile this with `cc -c my-library.c` to build `my-library.o`:
+This step is _not_ needed for static linking (because we'll use the Rust toolchain to do it for us), but we _could_ compile this to an object file:
 
 ```bash
 $ cc my-library.c -c
@@ -25,7 +25,7 @@ $ file my-library.o
 my-library.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
 ```
 
-Hook it into some Rust code:
+Write some Rust code that will make use of it. We have to tell Rust that there exists an external function named `square` that takes and returns an unsigned 32-bit int:
 
 ```rust
 #[link(name="mylib")]
@@ -39,7 +39,7 @@ fn main() {
 }
 ```
 
-This tells Rust that we have a library `mylib` containing a `square` function. It's considered [`unsafe`](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html) and must be wrapped as such. But in order to let Rust access this library, we need a `build.rs` [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html) located at the _root_ of our crate (not in the `src/` folder):
+Our function is considered [`unsafe`](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html) and must be wrapped as such. But in order to let Rust access this library, we need a `build.rs` [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html) located at the _root_ of our crate (not in the `src/` folder):
 
 ```rust
 fn main() {
@@ -86,7 +86,7 @@ fn main() {
 }
 ```
 
-To build our program, `rustc` will need to know about this library. Therefore, we instruct our `build.rs` script to use [`rustc-link-search`](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search) in order to know where the library is during compilation. The build script also specifies that we want to link to the `my-library` dynamic library.
+To compile our program, `rustc` will need to know about the library. Therefore, our `build.rs` script specifies [`rustc-link-search`](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-search) in order to know _where_ the library is during compilation. The build script also specifies that we want to _dynamically_ link to the dylib `my-library`.
 
 ```rust
 fn main() {
@@ -94,16 +94,16 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=my-library");
 }
 ```
-**NOTE** that while we're calling the library `my-library`, the linker actulaly looks for a file with a 'lib' prefix: `libmy-library.so`, so we have to compile it accordingly:
+**NOTE** that while we're calling the library `my-library`, the linker actually looks for a file with a 'lib' prefix, `libmy-library.so`, so we have to compile it accordingly:
 
 ```bash
-$ gcc c-code/my-library.c -c -shared -o libmy-library.so
+$ gcc c-code/my-library.c -shared -o libmy-library.so
 
 $ ls *.so
 libmy-library.so
 
 $ file libmy-library.so
-libmy-library.so: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
+libmy-library.so: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=49953c0cb91c9212594e24e6e3c3ee531f06a9df, not stripped
 ```
 
 We should be able to build now:
@@ -114,11 +114,11 @@ $ cargo build
     Finished dev [unoptimized + debuginfo] target(s) in 0.67s
 
 $ ./target/debug/simple-ffi
-./target/debug/simple-ffi: error while loading shared libraries: libmylib.so: cannot open shared object file: No such file or directory
+./target/debug/simple-ffi: error while loading shared libraries: libmy-library.so: cannot open shared object file: No such file or directory
 
 $ ldd target/debug/simple-ffi
         linux-vdso.so.1 (0x00007fffe5d32000)
-        libmylib.so => not found
+        libmy-library.so => not found
         libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f7c61a70000)
         librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f7c61860000)
         libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f7c61640000)
@@ -127,9 +127,13 @@ $ ldd target/debug/simple-ffi
         /lib64/ld-linux-x86-64.so.2 (0x00007f7c62000000)
 ```
 
-The binary file can't find the library, and running `ldd` shows that it's attempting to dynamically load the shared object file we compiled. Even if that file is in the same directory, it doesn't work because that's not how Linux loads its shared objects. You have to either copy the .so file into or update your `LD_LIBRARY_PATH`. The quick fix is to do the latter:
+The binary file can't find the library at runtime, and running `ldd` shows that it's attempting and failing to dynamically load the shared object file we compiled. Even if that file is in the same directory, it doesn't work because that's not how Linux loads its shared objects. You have to either copy the .so file into a folder specified by `LD_LIBRARY_PATH` or update your `LD_LIBRARY_PATH` when running. The quick fix is to do the latter:
 
 ```bash
 $ LD_LIBRARY_PATH=. ./target/debug/simple-ffi
 3**2 = 9
 ```
+
+## Additional details
+
+If you compile with the `-c` flag instead of `-shared`, even with the `build.rs` script and `main.rs` setup for dynamic linking, it appears that the library will be statically linked. I haven't dived into this much, but in writing this post, I ran into my hopefully-dynamically linked accidentally being statically linked.
