@@ -50,6 +50,7 @@ fn main() {
     cc::Build::new()
         .file("c-code/my-library.c")
         .compile("mylib");
+}
 ```
 
 Note that this build script bridges the name of our file (`my-library.c`) and the library name (`mylib`). Since this is using the [`cc` crate](https://crates.io/crates/cc), we have to included it in the `Cargo.toml`:
