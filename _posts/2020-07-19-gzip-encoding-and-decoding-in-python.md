@@ -50,7 +50,7 @@ fn main() {
 }
 ```
 
-A gigabyte of evenly-distributed ASCII data isn't exactly realistic but probably sufficient. After building release, I ran this and redirected it into a text file:
+A gigabyte of uniformly-distributed ASCII data isn't exactly realistic but probably sufficient. After building release, I ran this and redirected it into a text file:
 
 ```bash
 time ./target/release/generate-random-data > random_data.txt
@@ -85,7 +85,7 @@ sys     0m4.313s
 Running my comparable Rust code against the same input:
 
 ```bash
-$time ./target/release/gzip-rs
+$ time ./target/release/gzip-rs
 
 real    0m27.968s
 user    0m25.969s
@@ -95,7 +95,7 @@ sys     0m1.047s
 Since my original code was using a buffer size of 10kb and since the above example shows how much buffer size can affect i/o, I increased the size for this example to 100\_000 and re-ran:
 
 ```bash
-$ time ./target/release/zip-rs
+$ time ./target/release/gzip-rs
 
 real    0m27.735s
 user    0m25.453s
