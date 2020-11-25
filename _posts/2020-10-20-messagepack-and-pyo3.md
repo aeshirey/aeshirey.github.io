@@ -112,4 +112,4 @@ len(gzip.compress(s.encode('utf-8'))) # 279
 Again, gzipping significantly reduces the size. Now that there's variation in the data, we don't see as stark a contrast: MP is now 79% the size of JSON.
 
 ## Performance
-This post doesn't address the performance implications of ser/de of a large/complex data structure into the two formats nor the gzipping from Python if you want to further reduce size. That's covered in my next post.
+This post doesn't address the performance implications of ser/de of a large/complex data structure into the two formats nor the gzipping from Python if you want to further reduce size. That's covered in my next post, [Benchmarking MsgPack vs JSON in Rust](https://aeshirey.github.io/code/2020/11/25/benchmarkng-msgpack-vs-json-in-rust.html).
