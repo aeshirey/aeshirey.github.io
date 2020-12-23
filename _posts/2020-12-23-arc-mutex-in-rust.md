@@ -101,6 +101,7 @@ let t1 = thread::spawn(move || {
     };
     println!("Thread 1 dropped lock");
 });
+```
 
 
 When both threads are running, the main thread calls [`.join`](https://doc.rust-lang.org/std/thread/struct.JoinHandle.html#method.join) to wait for them to finish. Here, we don't really care about the order in which `.join` is called becuase we don't want to do anything else until *both* have completed. These are blocking operations, so our main thread will wait until they're done. At that point, we acquire the lock, unwrap its `Result`, and we have the updated data. If we didn't call `.join`, our main thread would likely acquire the lock before the threads had time to start, and the program would exit before the threads had a chance to run.
