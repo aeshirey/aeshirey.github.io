@@ -87,6 +87,7 @@ To be clear, this clones the `Arc`; this gives us a reference to one and _only_ 
 
 This new thread starts running by immediately attempting to acquire a lock on our data. It may or may not get it right away. If it does, then it will start modifying data; if not, it will block until it has access. Only *one* thread is able to access our data at a time.
 
+```rust
 let t1 = thread::spawn(move || {
     println!("Thread 1 attempting to acquire lock...");
     if let Ok(mut x) = thread_arc.lock() {
@@ -113,4 +114,4 @@ let my_data = my_data.lock().unwrap();
 
 One other note is that our two threads are basically started at the same time, so which one gets executed first is indeterminate. Therefore, our initial values of `[1, 2, 3]` might end up as `[3, 5, 7]` or `[4, 6, 8]`.
 
-* - Per [the `Arc` documentation](https://doc.rust-lang.org/std/sync/struct.Arc.html#thread-safety), "atomic operations are more expensive than ordinary memory accesses (`Rc`)", but using `Arc` overall isn't terribly expensive.
+\* - Per [the `Arc` documentation](https://doc.rust-lang.org/std/sync/struct.Arc.html#thread-safety), "atomic operations are more expensive than ordinary memory accesses (`Rc`)", but using `Arc` overall isn't terribly expensive.
