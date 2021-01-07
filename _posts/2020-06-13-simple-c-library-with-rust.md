@@ -25,7 +25,7 @@ $ file my-library.o
 my-library.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
 ```
 
-Write some Rust code that will make use of it. We have to tell Rust that there exists an external function named `square` that takes and returns an unsigned 32-bit int:
+Write some Rust code that will make use of it. We have to tell Rust that there exists an external function named `square` that takes and returns a signed 32-bit int:
 
 ```rust
 #[link(name="mylib")]
@@ -53,7 +53,7 @@ fn main() {
 }
 ```
 
-Note that this build script bridges the name of our file (`my-library.c`) and the library name (`mylib`). Since this is using the [`cc` crate](https://crates.io/crates/cc), we have to included it in the `Cargo.toml`:
+Note that this build script bridges the name of our file (`my-library.c`) and the library name (`mylib`). Since this is using the [`cc` crate](https://crates.io/crates/cc), we have to include it in the `Cargo.toml`:
 
 ```toml
 [build-dependencies]
