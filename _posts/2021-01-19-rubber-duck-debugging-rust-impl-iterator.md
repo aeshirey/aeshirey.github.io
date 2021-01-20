@@ -89,7 +89,7 @@ This fails with:
 
 This is because the iterator, `it`, doesn't own the data to which it's referring, so instead of `T`, each element is `&T`. There are two different ways to work around this (as far as I know).
 
-## Dereference the borrowed `&T`
+## Dereference the borrowed &T
 If you identify the type returned by our `Vec`'s `.iter()` method, you'll see that it's a [`std::slice::Iter<i32>`](https://doc.rust-lang.org/std/slice/struct.Iter.html). Subsequent calls on the iterator – such as `.map` or `.filter` – always result in an `impl Iterator<Item = T>` with `T` changing depending on the operation:
 
 ```rust
@@ -129,7 +129,7 @@ fn main() {
 
 The deref is just copying our data. Maybe that's fine – it's still only copied lazily – but maybe we want to avoid this unnecessary copy depending on what other iterations we're doing.
 
-## Use `std::slice::Iter<T>`
+## Use std::slice::Iter<T>
 Instead of trying to change `it` from a `slice::Iter` to an `impl Iterator`, we can change the signature of the first function, `plus1`, to accept a `slice::Iter`:
 
 ```rust
@@ -157,7 +157,7 @@ help: to declare that the `impl Trait` captures data from argument `it`, you can
    |                                                                  ^^^^
 ```
 
-Here, rustc is being extremely helpful in telling us what to do, so we simply append the [anonymous lifetime]https://doc.rust-lang.org/nightly/edition-guide/rust-2018/ownership-and-lifetimes/the-anonymous-lifetime.html):
+Here, rustc is being extremely helpful in telling us what to do, so we simply append the [anonymous lifetime](https://doc.rust-lang.org/nightly/edition-guide/rust-2018/ownership-and-lifetimes/the-anonymous-lifetime.html):
 
 ```rust
 fn plus1(it: std::slice::Iter<i32>) -> impl Iterator<Item = i32> + '_ {
@@ -167,7 +167,7 @@ fn plus1(it: std::slice::Iter<i32>) -> impl Iterator<Item = i32> + '_ {
 
 This version works just fine. The trade-off here is that our first function accepts a different type than other functions do, but we avoid a copy. Of course, `plus1` and `times2` themselves are copying data.
 
-## `Box` and `.into_iter()`
+## Box and .into\_iter()
 
 An alternate approach is to allow our iterators to take ownership of the input data. This requires boxing the iterator, which is more syntactically verbose: instead of `impl Trait`, we now use [`Box<dyn Trait>`](https://doc.rust-lang.org/edition-guide/rust-2018/trait-system/dyn-trait-for-trait-objects.html) and have to call `Box::new()` with values here and there.
 
