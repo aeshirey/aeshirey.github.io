@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Adding built time into your Rust package"
+title:  "Adding build time into your Rust package"
 date:   2021-02-12 23:08:10 -0700
 category: code
 tags: [rust]
