@@ -15,7 +15,7 @@ I don't have any of these appliances, and this is a preliminary bit of research.
 
 I'm using dollar amounts as a way to decide whether to pick something and which option to pick and as a proxy for environmental impact.
 
-From an _economic_ perspective, if I treat a purchase of some energy efficienc appliance as an investment, I'll compare it against a 9% annual return. The appliance will cost some amount, $X, and when lower energy costs save me $X over some period of time, I now have 'doubled' my investment: I have saved the original purchase price _and_ I have the appliance itself to continue saving more money. I'm grossly simplifying by assuming the appliance will last forever. A 9% interest rate will double in `$X*2 = $X*1.09^t` or `2 = 1.09^t` or `log(2)/log(1.09)` = 8 years, so purely on the economics, anything that can pay for itself in less than 8 years is probably a good bet, and the shorter the return period, the better.
+From an _economic_ perspective, if I treat a purchase of some energy efficient appliance as an investment, I'll compare it against a 9% annual return. The appliance will cost some amount, $X, and when lower energy costs save me $X over some period of time, I now have 'doubled' my investment: I have saved the original purchase price _and_ I have the appliance itself to continue saving more money. I'm grossly simplifying by assuming the appliance will last forever. A 9% interest rate will double in `$X*2 = $X*1.09^t` or `2 = 1.09^t` or `log(2)/log(1.09)` = 8 years, so purely on the economics, anything that can pay for itself in less than 8 years is probably a good bet, and the shorter the return period, the better.
 
 # Heat Pump Clothes Dryer
 
@@ -31,9 +31,8 @@ From an _economic_ perspective, if I treat a purchase of some energy efficienc a
 
 ### Cost analysis
 Electric dryer baseline:
-* Assume electric dryer uses 4 kWh/load<sup>[\[1\]](https://www.directenergy.com/learning-center/how-much-energy-dryer-use)</sup> @ $0.10/kWh = $0.40/load
 * Assume 7 cu ft capacity that directly correlates with load size
-* Assume 4 kWh/load @ $0.10/kWh = $0.40/load
+* Assume 4 kWh/load<sup>[\[1\]](https://www.directenergy.com/learning-center/how-much-energy-dryer-use)</sup> * $0.10/kWh = $0.40/load
 * Assume 5 loads/wk * 52 weeks * $0.40/load = $104/year
 
 Heat pump comparison:
