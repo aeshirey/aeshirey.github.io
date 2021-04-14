@@ -15,19 +15,21 @@ I don't have any of these appliances, and this is a preliminary bit of research.
 
 I'm using dollar amounts as a way to decide whether to pick something and which option to pick and as a proxy for environmental impact.
 
+From an _economic_ perspective, if I treat a purchase of some energy efficienc appliance as an investment, I'll compare it against a 9% annual return. The appliance will cost some amount, $X, and when lower energy costs save me $X over some period of time, I now have 'doubled' my investment: I have saved the original purchase price _and_ I have the appliance itself to continue saving more money. I'm grossly simplifying by assuming the appliance will last forever. A 9% interest rate will double in `$X*2 = $X*1.09^t` or `2 = 1.09^t` or `log(2)/log(1.09)` = 8 years, so purely on the economics, anything that can pay for itself in less than 8 years is probably a good bet, and the shorter the return period, the better.
+
 # Heat Pump Clothes Dryer
 
-## Pros
+### Pros
 * Ventless
 * Some can be 110v, so can be placed anywhere
 * Because it uses lower temperatures, it is gentler on clothes.
 
-## Cons
+### Cons
 * Can be 3-4x as expensive (to buy) vs a conventional vented dryer
-* Loads can take 1.5hs to dry instead of 45m
+* Loads can take 1.5hrs to dry instead of 45m
 * Removed moisture has to be drained/dumped
 
-## Cost analysis
+### Cost analysis
 Electric dryer baseline:
 * Assume electric dryer uses 4 kWh/load<sup>[\[1\]](https://www.directenergy.com/learning-center/how-much-energy-dryer-use)</sup> @ $0.10/kWh = $0.40/load
 * Assume 7 cu ft capacity that directly correlates with load size
@@ -47,7 +49,7 @@ Heat pump comparison:
 # Condenser Clothes Dryer
 There are also condenser dryers that are cheaper up-front but twice as energy intense as heat pump dryers. They seem to be a good middle-ground between conventional vented and heat pumps, though they are also often smaller in size (~4 cu ft versus conventional and heat pump 7 cu ft).
 
-Cost analysis:
+### Cost analysis
 * Assume the marginal purchase cost is $500
 * Assume load size is (4/7) and thus we're doing (7/4) as many loads
 * Assume 2 kWh/load<sup>[\[3\]](https://en.wikipedia.org/wiki/Clothes_dryer#Condenser_dryers)</sup> * $0.10/kWh = $0.20/load
@@ -60,22 +62,23 @@ Cost analysis:
 # Spin Dryer intermediate step?
 Using a spin dryer, [this site](https://www.greenandgrowing.org/money-energy-laundry-spin-dryer/) claims that a five minute cycle at 400W can reduce the drying cycle time by half. 
 
-Pros:
+### Pros
 * 400W would be low enough to run on a 110V outlet, so it could be placed anywhere
 * Reduced drying times
 * In some situations, could dry clothes 'well enough' and obviate the need for the other dryer
 
-Cons:
+### Cons
 * Extra step involved
 * Extra appliance needed
 
+### Cost analysis
 * Assuming that's correct, a first pass might cost 0.4 kW * (5/60) hr = $0.033/load to spin.
 * This is also 5 loads/wk * 52wks/yr * 0.033/load = $8.67/yr.
 * Assuming a purchase price of around $160 (for example, with [this product](https://www.amazon.com/Laundry-Alternative-Centrifugal-High-Tech-Suspension/dp/B07X3MWR3V))
 * Assuming heat pump is used for the second step, annual cost is halved to $13, so combined annual cost is $21.66.
-    * The ROI is now ($1000 heat pump + $160 spin dryer) divided by ($104-21.66) = **14.1 years**
+    * The ROI is now ($1000 heat pump + $160 spin dryer) divided by ($104-21.66)/yr = **14.1 years**
 * Assuming condenser dryer is used for the second step, annual cost is halved to $45.50, so combined annual cost is $54.17
-    * The ROI is now ($500 heat pump + $160 spin dryer) divided by ($104-54.17) = **13.2 years**
+    * The ROI is now ($500 heat pump + $160 spin dryer) divided by ($104-54.17)/yr = **13.2 years**
 * Assuming only a spin dryer is used with a conventional dryer, the annual cost is dropped from $104 to $52.
     * The ROI is now $160 spin dryer divided by 52 = **3.1 years**
 
