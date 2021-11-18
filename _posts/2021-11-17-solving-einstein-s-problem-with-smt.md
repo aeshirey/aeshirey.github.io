@@ -59,7 +59,7 @@ This is done for all properties. The idea is to be able to call each of these fu
 (assert (norwegian 1))
 ```
 
-I programmatically generated these in Python by printing the generated s-exprs to stdout:
+I programmatically generated these function declarations in Python by printing the generated s-exprs to stdout:
 
 ```python
 parameters = {
@@ -90,7 +90,7 @@ The definition of the puzzle is that each such parameter (or property) applies t
 ))
 ```
 
-This constrains the solution such that `blue` must be true for at least one of the houses. But we need to further constrain it so that it's true for _only_ one house. The way to do this is to generate a lot more constraints that require that it's not the case that blue[i] and blue[j] for each i and j such that i != j:
+This constrains the solution such that `blue` must be true for at least one of the houses. But we need to further constrain it so that it's true for _only_ one house. The way to do this is to generate a lot more constraints that require that it's not the case that `(blue i)` and `(blue j)` for each i and j such that i != j:
 
 ```
 (assert (not (and (blue 1) (blue 2))))
@@ -105,9 +105,9 @@ This constrains the solution such that `blue` must be true for at least one of t
 (assert (not (and (blue 4) (blue 5))))
 ```
 
-Note that adding multiple constraints is the same as having a single s-expr as the conjunction (boolean `and`) of multiple s-exprs.
+Note that adding multiple separate constraints (`assert` s-exprs) is the same as having a single s-expr as the conjunction (boolean `and`) of multiple s-exprs.
 
-There's a further restriction -- this one bit me as I was debugging my nearly complete solution -- that once property holds for a house, all other related properties must not hold. That is, if `(blue 4)` is true, then `(red 4)` must not be true (which is the same as `(not (red 4))` is true). I then generated all of these s-exprs in Python:
+There's a further restriction -- this one bit me as I was debugging my nearly complete solution -- that once a property holds for a house, all other related properties must not hold. That is, if `(blue 4)` is true, then `(red 4)` must _not_ be true (which is the same as `(not (red 4))` must hold true). I then generated all of these s-exprs in Python:
 
 ```python
 for (k, vs) in parameters.items():
