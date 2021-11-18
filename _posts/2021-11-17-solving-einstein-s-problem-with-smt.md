@@ -10,6 +10,8 @@ I recently became interested in learning about [boolean satisfiability (SAT)](ht
 
 I am at the very early stages of learning about SAT/SMT, and [as a way to help me learn it myself](https://www.psychologytoday.com/us/blog/how-be-brilliant/201206/the-prot-g-effect), I'm writing this post - with the additional hope that it might help others. For the purpose of this post, I'm conflating the terms SAT and SMT, and I don't define them here. The very high-level description of SAT is that we declare constraints over some boolean propositions and let the SMT solver figure it out; this is in contrast to trying to write some complicated or brute-force algorithm to figure it out for us. We declare these constraints using [s-expressions](https://en.wikipedia.org/wiki/S-expression) comprising the [SMT-LIB language](http://smt-lib.org/).
 
+You can find the the final script and the generated input SMT-LIB and output model from this post [here](https://github.com/aeshirey/learn-sat-smt/tree/main/examples/einsteins-problem).
+
 ## Einstein's Problem
 "Einstein's Problem" is the kind of logical thinking puzzle I used to do in high school: there are five houses, each of a different color, with an owner of a different nationality, etc. Each such property is unique; that is, exactly one house must be blue, exactly one owner drinks milk, exactly one owner keeps birds, and so on. There are also hints as to who lives in which house -- the owner of the blue house also drinks milk; the owner of the red house is neighbors with the beer drinker.
 
@@ -228,7 +230,7 @@ That's all we need to constrain the model! The last two s-expressions will check
 (get-model)
 ```
 
-I print these out in Python and run the final script (which, with comments that I omitted in this post, makes the entire script 142 lines). The output file I created generates just over 1000 lines. When I run it through Z3 using `z3 einstein-generated.smt2`, I get the following output:
+I print these out in Python and run the script, generating just over 1000 lines of SMT-LIB code. When I run that through Z3 using `z3 einstein-generated.smt2`, I get the following output:
 
 ```
 sat
