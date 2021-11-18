@@ -8,10 +8,9 @@ tags: [rust]
 
 A quick example of how to share data across threads in Rust using a [`Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html). First, a quick explanation:
 
-Our data (`my_data`, below) is shared between multiple threads -- one thread might be updating it, another might want to read from it, yet another miht simultaneously try to update it from another entrypoint. We only have one copy of the data, so we use [mutual exclusion](https://en.wikipedia.org/wiki/Lock_(computer_science)) to allow exactly one entity to gain access to it at a time. But the mutex itself can't be safely accessed across multiple, so we use [`Arc` -- atomically reference counted](https://doc.rust-lang.org/std/sync/struct.Arc.html) -- to proctor access to the mutex.
+Our data (`my_data`, below) is shared between multiple threads -- one thread might be updating it, another might want to read from it, yet another might simultaneously try to update it from another entrypoint. We only have one copy of the data, so we use [mutual exclusion](https://en.wikipedia.org/wiki/Lock_(computer_science)) to allow exactly one entity to gain access to it at a time. But the mutex itself can't be safely accessed across multiple, so we use [`Arc` -- atomically reference counted](https://doc.rust-lang.org/std/sync/struct.Arc.html) -- to proctor access to the mutex.
 
 Thus we have one copy of `my_data`, one Mutex wrapping it, and any number of fairly inexpensive Arcs\*. The entire code is here, and some brief explanation below:
-
 
 ```rust
 use std::thread;
@@ -40,7 +39,11 @@ fn main() {
             // simulate some long-running work
             thread::sleep(Duration::from_millis(750));
         };
+
         println!("Thread 1 dropped lock");
+
+        // Do something else with the data
+        thread::sleep(Duration::from_millis(900));
     });
 
     let thread_arc = my_data.clone();
@@ -55,7 +58,11 @@ fn main() {
             // simulate some long-running work
             thread::sleep(Duration::from_millis(1250));
         };
+
         println!("Thread 2 dropped lock");
+
+        // Do something else with the data
+        thread::sleep(Duration::from_millis(1100));
     });
 
     t1.join().unwrap();
@@ -99,10 +106,13 @@ let t1 = thread::spawn(move || {
         // simulate some long-running work
         thread::sleep(Duration::from_millis(750));
     };
+
     println!("Thread 1 dropped lock");
+
+    // Do something else with the data
+    thread::sleep(Duration::from_millis(900));
 });
 ```
-
 
 When both threads are running, the main thread calls [`.join`](https://doc.rust-lang.org/std/thread/struct.JoinHandle.html#method.join) to wait for them to finish. Here, we don't really care about the order in which `.join` is called becuase we don't want to do anything else until *both* have completed. These are blocking operations, so our main thread will wait until they're done. At that point, we acquire the lock, unwrap its `Result`, and we have the updated data. If we didn't call `.join`, our main thread would likely acquire the lock before the threads had time to start, and the program would exit before the threads had a chance to run.
 
@@ -116,3 +126,10 @@ let my_data = my_data.lock().unwrap();
 One other note is that our two threads are basically started at the same time, so which one gets executed first is indeterminate. Therefore, our initial values of `[1, 2, 3]` might end up as `[3, 5, 7]` or `[4, 6, 8]`.
 
 \* - Per [the `Arc` documentation](https://doc.rust-lang.org/std/sync/struct.Arc.html#thread-safety), "atomic operations are more expensive than ordinary memory accesses (`Rc`)", but using `Arc` overall isn't terribly expensive.
+
+## Update: unreasonable simplicity
+The original code I posted above [was unreasonably simple](https://github.com/aeshirey/aeshirey.github.io/issues/5): both threads acquired a lock, simulated work, and returned. This meant that both threads essentially ran one after the other but not truly simultaneously.
+
+Before and/or after the critical section (within the `if let` block), we presumably want to do something else. In a real project, maybe it's preparing some data to insert into a shared data structure before we acquire it. Maybe we update a value and calculate something from it afterward. But the critical section shouldn't be the only thing in the thread, otherwise you have one thread using the mutex and all other threads waiting for their turn, one by one.
+
+If your code is only doing something inside the mutex's critical section, then multithreading probably isn't the way to go.

@@ -2,7 +2,7 @@
 from time import localtime
 import re
 
-KNOWN_TAGS = ['python', 'rust', 'data', 'c#', 'energy-efficiency']
+KNOWN_TAGS = ['python', 'rust', 'data', 'c#', 'energy-efficiency', 'smt']
 
 now = "%d-%02d-%02d %02d:%02d:%02d -0700" % localtime()[:6]
 ymd = "%d-%02d-%02d" % localtime()[:3]
