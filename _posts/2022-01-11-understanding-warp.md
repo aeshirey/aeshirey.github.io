@@ -17,16 +17,17 @@ futures = "0.3"
 warp = "0.3"
 ```
 
-Warp uses the concept of composable request [`Filter`s](https://docs.rs/warp/latest/warp/trait.Filter.html): components that match requests, extract data from them (URI components, query parameters, request bodes, etc.), and chain together (and/or).
+warp uses the concept of composable request [`Filter`s](https://docs.rs/warp/latest/warp/trait.Filter.html): components that match requests, extract data from them (URI components, query parameters, request bodes, etc.), and chain together (and/or).
 
 ## Welcome
 
 To start, we'll make our `main` function asynchronous and add a route that matches the root of the server and prints a welcome message:
 
 ```rust
+use warp::Filter;
+
 #[tokio::main]
 async fn main() {
-    use warp::Filter;
     let index = warp::path::end().map(|| "Welcome!");
 
     let routes = index;
@@ -44,8 +45,9 @@ Very unsurprisingly, if you run this project and go to http://127.0.0.1:3000/, y
 This first request isn't particularly interesting or transparent, so let's handle an input path such as `/hello/adam` as a way to say hello to the user, and its code will be added as its own function.
 
 ```rust
+use warp::{path, Filter};
+
 async fn main() {
-    use warp::{path, Filter};
     let index = warp::path::end().map(|| "Welcome!");
 
     let hello = path!("hello" / String).then(handle_hello);
@@ -62,7 +64,7 @@ async fn handle_hello(name: String) -> impl warp::Reply {
 There are several changes here:
 
 * `hello` is defined using the [`warp::path!`](https://docs.rs/warp/latest/warp/macro.path.html) macro which adds convenience for declaring URI path components and arguments. `path!("hello" / String)` declares that we're handling a path that starts with the literal `hello` then some String argument.
-* We augment our handled routes by handling any request that matches the root (via `index`) _or_ any request that matches the `hello` handler. When a request comes in, warp will first check whether `index` handles it; if not, it will check if `hello` handles it.
+* We augment our handled `routes` by handling any request that matches the root (via `index`) _or_ any request that matches the `hello` handler. When a request comes in, warp will check these in order. (Requests that match none of these are discussed below.)
 * The asynchronous `handle_hello` function accepts the provided argument and returns some type that implements `Reply`. Note that under the hood, this async function ends up returning a `Future`, but this is transparent to us.
 * To use an async function, we compose our path with `.then`; unintuitively, if `handle_hello` was synchronous, we'd use `.map` instead.
 
@@ -84,6 +86,8 @@ async fn main() {
         .and(warp::path::end())
         .and_then(handle_goodbye);
 
+    let routes = index.or(hello).or(goodbye);
+
     // ...
 }
 
@@ -102,25 +106,32 @@ async fn handle_goodbye(name: String) -> Result<impl Reply, Infallible> {
 }
 ```
 
-Declaring `goodbye` is now using the explicit warp Filters `path`, `param`, and `end`. This is very much like `path!` did for `hello`. Like many things in Rust, the type for the `param` is inferred by virtue of the function we're calling. Note that both `handle_hello` and `handle_goodbye` use _owned_ values (ie, String instead of &str), which is required for async functions for reasons outside the scope of this post.
+Declaring `goodbye` is now using the explicit warp Filters `path`, `param`, and `end`. This is very much like `path!` did for `hello`. As is common in Rust, type inference is used to determine the type that `param` expects (by virtue of the function we're calling). Note that both `handle_hello` and `handle_goodbye` use _owned_ values (ie, String instead of &str), which is required for async functions for reasons outside the scope of this post.
 
-The function `handle_goodbye` now returns a `Result<_, Infallible>`. This is to say, this function cannot fail (all code paths _must_ return `Ok`) but does return a `Result`. There are times in which you must return a `Result`, and if the function never fails, we can use `Infallable` as the error type. Becausue this function returns a result, we switch `goodbye` from using `.then` to `.and_then` -- also unintuitive, IMO.
+The function `handle_goodbye` now returns a `Result<_, Infallible>`. This is to say, this function cannot fail (all code paths _must_ return `Ok`) but still returns a `Result`. There are times in which you must return a `Result` (eg, because some trait requires it), and if the function never fails, we can use `Infallable` as the error type. Becausue this function returns a Result, we switch `goodbye` from using `.then` to `.and_then` -- also unintuitive, IMO.
 
-Finally, this function uses the `reply::with_status` function to return two different replies and statuses depending on some condition (here, the value of `name`). But both branches will return a specific concrete type (`warp::reply::WithStatus`), so we still use `impl Reply`.
+Finally, this function uses the `reply::with_status` function to return two different replies and statuses depending on some condition (here, the value of `name`). But both branches will return the same concrete type (that is, `warp::reply::WithStatus`), so we can still use `impl Reply`.
 
 ## Logins are more complicated
 All three routes are currently infallible -- if an HTTP request matches the path for a route, warp _will_ respond to it. Usually it's with a 200 OK, but sometimes with 418 IM_A_TEAPOT. And the responses all contain a text body. But what if we want to redirect to another page? Or what if we start handling a request, decide that the designated function isn't equipped to handle it, and want another function to take over? This is where we make use of `Rejection`s. First, let's setup a `login` route:
 
 ```rust
-let login = warp::path("login")
-    .and(warp::path::param())
-    .and(warp::path::end())
-    .and_then(handle_login);
+#[tokio::main]
+async fn main() {
+    // ...
 
-let routes = index.or(hello).or(goodbye).or(login);
+    let login = warp::path("login")
+        .and(warp::path::param())
+        .and(warp::path::end())
+        .and_then(handle_login);
+
+    let routes = index.or(hello).or(goodbye).or(login);
+
+    // ...
+}
 ```
 
-(We're still just using the request path, such as `/login/adam`, for simplicity.)
+(For simplicity, we're still just using a GET request with path parameters, such as `/login/adam`.)
 
 The handling function is now no longer fallible and can reject the request (which is to say that it will allow another handler to potentially pick it up). Let's assume there are a few users that we don't want to login: `agent_smith` and `neo`:
 
@@ -138,7 +149,7 @@ async fn handle_login(name: String) -> Result<String, warp::Rejection> {
 
 (This function's happy path returns a `String` instead of `impl Reply` only to show that it's possible to declare it that way. `String` _does_ implement `Reply`, so this is functionally identical.)
 
-What should we do for these users? [`warp::reject`](https://docs.rs/warp/latest/warp/reject/index.html) provides a `not_found` function that will rejet a request. For Agent Smith, let's use that:
+What should we do for these users? [`warp::reject`](https://docs.rs/warp/latest/warp/reject/index.html) provides a `not_found` function that will reject a request. For Agent Smith, let's use that:
 
 ```rust
     if name == "agent_smith" {
@@ -148,7 +159,7 @@ What should we do for these users? [`warp::reject`](https://docs.rs/warp/latest/
     }
 ```
 
-But 'not found' isn't particularly descriptive, and it doesn't give us much control over how the rejection is subsequently handled. We can create our own types that implements `Debug` and `Reject`, then we can return this as a custom rejection:
+But 'not found' isn't particularly descriptive, and it doesn't give us much control over how the rejection is subsequently handled. We can create our own type that implements `Debug` and `Reject`, then we can return this as a custom rejection:
 
 ```rust
 #[derive(Debug)]
@@ -174,30 +185,18 @@ Now we have three different types of responses to our three different logins:
 
 But how can we make use of these rejected requests?
 
-## Setting a fall-through handler
-The first and simplest way to handle these rejected requests is to add another handler that will match them, thus giving them a chance to be handled in another way.
-
-```rust
-let fallthrough = warp::any().map(|| "All other requests here");
-let routes = index.or(hello).or(goodbye).or(login).or(fallthrough);
-```
-
-`.any` matches all requests. Since `fallthrough` comes after `login` in our route handling, if the latter rejects the request, the former will pick it up. Thus, `/login/adam` logs us in while the other two will now return 200 `"All other requests here"`.
-
-This is pretty rudimentary, so let's try something more complex.
-
 ## Handling rejections
-A warp `Rejection` can be recovered with [`.recover`](https://docs.rs/warp/latest/warp/trait.Filter.html#method.recover). If a request is rejected, it is passed to the recovery function which can then do something with it. (And that something might itself be another rejection.)
+Rejected requests can be recovered with [`.recover`](https://docs.rs/warp/latest/warp/trait.Filter.html#method.recover). The `Rejection` is passed to the recovery function which can then do something with it. (That something might itself be another rejection.)
 
 ```rust
 #[tokio::main]
 async fn main() {
     // ...
 
-    let routes = index
-        .or(hello)
-        .or(goodbye)
-        .or(login)
+    let login = warp::path("login")
+        .and(warp::path::param())
+        .and(warp::path::end())
+        .and_then(handle_login)
         .recover(handle_rejection);
 
     // ...
@@ -220,10 +219,19 @@ async fn handle_rejection(err: warp::Rejection) -> Result<Box<dyn Reply>, warp::
 }
 ```
 
-We are rejecting `/login/agent_smith` with a not found request, so those can be handled by checking `err.is_not_found`. In that case, we'll redirect to the root of our server. And the the `Neo` rejection type is handled using `err.find::<>`. In that case, we construct a 401 response with the specified message. All other rejections -- which _shouldn't_ be possible right now -- are gracefully handled with a 500. Note that this means the request can't fall through to any other recovery function should we add one later on.
+We are rejecting `/login/agent_smith` with a not found request, so those can be handled by checking `err.is_not_found`. In that case, we'll redirect to the root of our server. And the `Neo` rejection type is handled using `err.find::<>`. In that case, we construct a 401 response with the specified message. All other rejections -- which _shouldn't_ be possible right now -- are gracefully handled with a 500. Note that this means the request can't fall through to any other recovery function should we add one later on.
 
 You'll also note that this function doesn't return an `impl Reply` but a `Box<dyn Reply>`. This is because we now no longer have one concrete type being returned but two: the `WithStatus` as before but also whatever `redirect` returns, which in this case is a `warp::reply::WithHeader`. Thus we have to box the return type.
 
+## Setting a fall-through handler
+All of the request handlers we've setup, regardless of their fallibility, are setup to handle specific paths, such as `/`, `/hello/adam`, and `/login/agent_smith`. But our server doesn't know how to handle other requests such as `/about/contact.html`. This can be handled with a final handler that matches all requests:
+
+```rust
+let fallthrough = warp::any().map(|| "All other requests here");
+let routes = index.or(hello).or(goodbye).or(login).or(fallthrough);
+```
+
+`.any` matches all requests. Since `fallthrough` comes after `login` in our route handling, if a `login` request is ultimately still rejected, those requests will also be handled with 200 `"All other requests here"`.
 
 # The entire example
 Here's the code of this entire sample, combined and with comments:
@@ -248,22 +256,24 @@ async fn main() {
         .and(warp::path::end())
         .and_then(handle_goodbye);
 
-    //
+    // `handle_login` might reject some requests, but the subsequent 
+    // `handle_rejection` will take care of (some of) them.
+    // NB, `.recover` could be added to `routes` instead.
     let login = warp::path("login")
         .and(warp::path::param())
         .and(warp::path::end())
-        .and_then(handle_login);
+        .and_then(handle_login)
+        .recover(handle_rejection);
 
-    // If we decide to use a fallthrough request handler, this just 
-    // catches everything in a rather uninteresting way.
+    // This handler just catches everything in a rather uninteresting way.
     let fallthrough = warp::any().map(|| "All other requests here");
 
+    // warp will handle requests in the following order:
     let routes = index
         .or(hello)
         .or(goodbye)
         .or(login)
-        //.or(fallthrough) // not used, and it CAN'T be used in conjunction with .recover
-        .recover(handle_rejection);
+        .or(fallthrough);
 
     warp::serve(routes).run(([0, 0, 0, 0], 3000)).await;
 }
