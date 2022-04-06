@@ -44,3 +44,13 @@ This is caused by WSL2's inability to access Windows mounts (since WSL2 runs in 
     ...
     Uploading probably v0.2.0 (/home/adam/probably)
     adam@wsl:~/probably$ 
+
+## Cross-Compiling for Windows
+
+```bash
+rustup target add x86_64-pc-windows-gnu
+rustup toolchain install stable-x86_64-pc-windows-gnu
+cargo build --target x86_64-pc-windows-gnu
+```
+
+[`cross`](https://github.com/cross-rs/cross) might be useful to look into.
