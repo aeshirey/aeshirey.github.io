@@ -8,11 +8,11 @@ tags: [smt]
 
 Yesterday, the adults of my kids' scout troop had a video call to discuss the upcoming week-long camp many of the scouts will attend. One of the mundane tasks is to figure out which scouts will bunk with which other scouts. There are maybe 20 or so scouts of different ages, genders, and personalities, and they need to be placed into a limited number of tents or cabins.
 
-I wasn't personally involved in the phone call, but I was call-adjacent and aghast at the pen-and-paer approach to figuring out who should be where. Parents expressed their interest in having their kids _with_ this scout but _not with_ that scout. Boys and girls can't share a tent. Scouts may only share a tent with other scouts within three years of age (ie, no 17 year-old scouts bunking with 12 year-olds). The mental effort and time that went into that work annoyed my inner geek, so I proceeded to spend the next several hours solving the general case. It was a good excuse to play around with SMT again.
+I wasn't personally involved in the phone call, but I was call-adjacent and aghast at the pen-and-paper approach to figuring out who should be where. Parents expressed their interest in having their kids _with_ this scout but _not with_ that scout. Boys and girls can't share a tent. Scouts may only share a tent with other scouts within three years of age (ie, no 17 year-old scouts bunking with 12 year-olds). The mental effort and time that went into that work annoyed my inner geek, so I proceeded to spend the next several hours solving the general case. It was a good excuse to play around with SMT again.
 
 Rather than dive into all the details, I'll simply share [the public Gist with my v1 implementation](https://gist.github.com/aeshirey/0d8f4d2081217ded2ca6f5888e1f894f).
 
-The solution is a Python script that generates SMT-LIB code that is evaluated by [Z3](). After a few configurations (such as `NUM_TENTS` to identify how many tents are available), you specify the set of scouts with their age and gender:
+The solution is a Python script that generates [SMT-LIB](http://smtlib.cs.uiowa.edu/) code that is evaluated by [Z3](https://github.com/Z3Prover/z3). After a few configurations (such as `NUM_TENTS` to identify how many tents are available), you specify the set of scouts with their age and gender:
 
 ```python
 scouts = [
