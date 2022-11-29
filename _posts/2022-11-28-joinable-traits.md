@@ -53,10 +53,10 @@ fn main() {
         .map(|(lhs, grp)| IrisData {
             species: lhs.0,
             common_name: lhs.1,
-            average_sepal_length: grp.iter().map(|i| i.sepal_length).sum(),
-            average_sepal_width: grp.iter().map(|i| i.sepal_width).sum(),
-            average_petal_length: grp.iter().map(|i| i.petal_length).sum(),
-            average_petal_width: grp.iter().map(|i| i.petal_width).sum(),
+            average_sepal_length: grp.iter().map(|i| i.sepal_length).sum::<f32>() / grp.len() as f32,
+            average_sepal_width: grp.iter().map(|i| i.sepal_width).sum::<f32>() / grp.len() as f32,
+            average_petal_length: grp.iter().map(|i| i.petal_length).sum::<f32>() / grp.len() as f32,
+            average_petal_width: grp.iter().map(|i| i.petal_width).sum::<f32>() / grp.len() as f32,
         })
         .collect::<Vec<_>>();
 
