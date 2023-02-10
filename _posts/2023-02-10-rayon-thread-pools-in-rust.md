@@ -134,25 +134,6 @@ fn main() {
 }
 ```
 
-Alternately, you may want to limit your parallelism to leave compute available to other tasks:
-
-```rust
-fn main() {
-    let s = std::time::Instant::now();
-    let pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(2) // use only two threads
-        .build()
-        .unwrap();
-
-    pool.install(|| {
-        (1..=NUM_WORKERS)
-            .into_par_iter()
-            .for_each(|worker| do_work(worker, NUM_ITERATIONS));
-    });
-    println!("Work took {:?}", s.elapsed());
-}
-```
-
 ```
 Worker 1 doing work
 Worker 3 doing work
@@ -180,4 +161,52 @@ Worker 4 doing work
 Worker 2 doing work
 Worker 5 doing work
 Work took 4.002877261s
+```
+
+Alternately, you may want to limit your parallelism to leave compute available to other tasks:
+
+```rust
+fn main() {
+    let s = std::time::Instant::now();
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(2) // use only two threads
+        .build()
+        .unwrap();
+
+    pool.install(|| {
+        (1..=NUM_WORKERS)
+            .into_par_iter()
+            .for_each(|worker| do_work(worker, NUM_ITERATIONS));
+    });
+    println!("Work took {:?}", s.elapsed());
+}
+```
+
+```
+Worker 1 doing work
+Worker 3 doing work
+Worker 3 doing work
+Worker 1 doing work
+Worker 1 doing work
+Worker 3 doing work
+Worker 3 doing work
+Worker 1 doing work
+Worker 3 doing work
+Worker 4 doing work
+Worker 1 doing work
+Worker 2 doing work
+Worker 4 doing work
+Worker 2 doing work
+Worker 4 doing work
+Worker 2 doing work
+Worker 4 doing work
+Worker 2 doing work
+Worker 4 doing work
+Worker 5 doing work
+Worker 2 doing work
+Worker 5 doing work
+Worker 5 doing work
+Worker 5 doing work
+Worker 5 doing work
+Work took 12.004555134s
 ```
