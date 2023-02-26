@@ -21,7 +21,7 @@ $ cd rust-server
 $ cargo add oxhttp
 ```
 
-The [provided example](https://github.com/oxigraph/oxhttp#server) is perfect for what we want; I'll just _slightly_ tweak it by wrapping it in a `main` function:
+The [provided example](https://github.com/oxigraph/oxhttp#server) is just about perfect for what we want; I'll just _slightly_ tweak it by wrapping it in a `main` function:
 
 ```rust
 fn main() {
@@ -51,10 +51,10 @@ Build this with `cargo build --release` and test it out. I've configured my `~/.
 target-dir = "/home/adam/cargo-target"
 ```
 
-This means that I can run my built server with `~/cargo-target/release/rust-server`, and when I visit `http://localhost:8080` in my browser, I see the HTTP response `home`. The server now works, so I copied the binary into the current working directory.
+This means that I can run my built server with `~/cargo-target/release/rust-server`, and when I visit `http://localhost:8080` in my browser, I see the HTTP response "home". The server now works, so I copied the binary into the current working directory.
 
 ## Simple Docker image
-Next, we'll need to build a Dockerfile. As I said, I know pretty much nothing about Docker, but I want to avoid the Node route. It seems pretty much everything is built off of `alpine`, so I'll start there:
+Next, we'll need to build a Dockerfile. As I said, I know just about nothing about Docker, but I want to avoid the Node route. It seems pretty much everything is built off of [Alpine](https://www.alpinelinux.org/), so I'll start there:
 
 ```dockerfile
 FROM alpine:latest
@@ -62,7 +62,7 @@ COPY rust-server rust-server
 CMD ["rust-server"]
 ```
 
-Building this runs quickly and without issue:
+Building this is quick and completes without issue:
 
 ```shell
 $ docker build -t my-rust-server:latest .
@@ -160,7 +160,7 @@ Error relocating /bin/rust-server: gnu_get_libc_version: symbol not found
 
 I did some further sleuthing and found [a suggestion on Reddit](https://www.reddit.com/r/rust/comments/o8gxzn/understanding_why_a_rust_app_fails_within_an/) to use [this hack](https://github.com/TobiasDeBruijn/SkinFixer-API/blob/a24da0657f222101864cf5f500e81628b90eec18/Dockerfile) to make it work, but instead of continuing down this rabbit hole, I decided to try another approach I saw: [`musl`](https://en.wikipedia.org/wiki/Musl).
 
-## Static linking with `musl`
+## Static linking with musl
 
 Rust can compile to a number of [build targets](https://doc.rust-lang.org/rustc/targets/built-in.html); in my dev environment (Ubuntu in WSL2), the default is:
 
@@ -254,9 +254,7 @@ But wait: [it turns out](https://serverfault.com/a/876703) that there's a differ
 
 > 127.0.0.1:xxxx is the normal loopback address, and localhost:xxxx is the hostname for 127.0.0.1:xxxx.
 >
-> 0.0.0.0 is slightly different, it's an address used to refer to all _IP addresses on the same machine_. Or no specific IP address.
-
-(Emphasis mine.)
+> 0.0.0.0 is slightly different, it's an address used to refer to all IP addresses on the same machine. Or no specific IP address.
 
 Simply changing from "localhost" to "0.0.0.0", recompiling, rebuilding the image, and rerunning does the trick
 
