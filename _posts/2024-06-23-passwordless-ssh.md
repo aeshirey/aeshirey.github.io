@@ -38,3 +38,10 @@ ssh-rsa Xy5+In4uXy5+In4uXy5+In4uXy5+In4uX18ufiJ+Ll8ufiJ+Ll8ufiJ+Ll8ufiJ+Ll8ufiJ+
 Copy this line and connect (with your password) to _server_. If it doesn't already exist, create `~/.ssh/authorized_keys`. Append the above line to that file. You should now be able to connect from _client_ to _server_ without a password.
 
 Note: If you want to connect in the other direction, you will need to perform the same steps: generate a key with `ssh-keygen` on _server_ and its id\_rsa.pub line to _client_.
+
+## Making this work with VS Code
+To make your VS Code automatically authenticate to a remote host, you'll want to copy the newly-created `id_rsa` (_not_ the `id_rsa.pub`) file to `C:\Users\jquser\.ssh\`. For example, from within WSL:
+
+```bash
+adam@client:~$ cp .ssh/id_rsa /mnt/c/Users/adam/.ssh/
+```
